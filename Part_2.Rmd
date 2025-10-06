@@ -1,0 +1,179 @@
+---
+title: "Part_2"
+author: "Nicholas Raharjo"
+date: "2025-09-28"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+##Download the whole set of coding DNA sequences for E. coli and your organism of interest. How many coding sequences are present in these organisms? Present this in the form of a table. Describe any differences between the two organisms. 
+
+library("R.utils")
+
+URL="http://ftp.ensemblgenomes.org/pub/bacteria/release-53/fasta/bacteria_0_collection/escherichia_coli_str_k_12_substr_mg1655_gca_000005845/cds/Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz"
+download.file(URL,destfile="Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz")
+gunzip("Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa.gz")
+list.files() 
+library("seqinr")
+
+library("R.utils")
+URL="https://ftp.ensemblgenomes.ebi.ac.uk/pub/bacteria/release-62/fasta/bacteria_34_collection/corynebacterium_bovis_gca_003932475/cds/Corynebacterium_bovis_gca_003932475.ASM393247v1.cds.all.fa.gz"
+download.file(URL,destfile="Corynebacterium_bovis_gca_003932475.ASM393247v1.cds.all.fa.gz")
+gunzip("Corynebacterium_bovis_gca_003932475.ASM393247v1.cds.all.fa.gz")
+list.files()
+library("seqinr")
+
+cds_ecoli <- seqinr::read.fasta("Escherichia_coli_str_k_12_substr_mg1655_gca_000005845.ASM584v2.cds.all.fa")
+cds_Corybacterium <- seqinr::read.fasta("Corynebacterium_bovis_gca_003932475.ASM393247v1.cds.all.fa")
+length_Corynebacterium <- length(cds_Corybacterium)
+length_ecoli <- length(cds_ecoli)
+
+DNA_length <- data.frame(
+  Organism = c("E. coli", "Corynebacterium Bovis"),
+  DNA_Length = c(length_ecoli, length_Corynebacterium)
+)
+print(DNA_length)
+
+```
+firstly, the corynebacterium and e coli samples were downloaded using download.file command and then gunzip is used to decomrpesed the files from gz to fasta the resulting fasta will be placed into cds_ecoli and cds_Corybacterium and the length will befound by the command length() on the two cds files. DNA_length will be created and data.frame was used to create table. the first column is named Organims and the second DNA_Length with the latter having the length of ecoli and Corynebacterium the result was shown in the above table. length of E coli is 4239 and Corynebacterium Bovis is 2085. E coli has longer length than the selected organism.   
+
+```{r}
+##How much coding DNA is there in total for these two organisms? Present this in the form of a table. Describe any differences between the two organisms.
+
+ecoli_total <- length(unlist(cds_ecoli))
+corynebacterium_total <- length(unlist(cds_Corybacterium))
+
+Coding_DNA <- data.frame(
+  Organism = c("E. coli", "Corynebacterium Bovis"),
+  Total_Coding_DNA_Length = c(ecoli_total, corynebacterium_total)
+)
+print(Coding_DNA)
+
+```
+to find the coding DNA, the ecoli_total is created and the length command is used on the cds_ecoli which is unlisted with the unlist command. this was done with the corynebacterium also. a new table called Coding_DNA is created by data.frame command in which the columns were Organism and Total_Coding_DNA_Length which the latter is the ecoli_total and corynebacterium_total and the result were printed , shown aboce, E coli's total coding DNA length is 3978528 and corynebacterium is 2276373. E col las larger or more total coding DNA. 
+```{r}
+
+##Calculate the length of all coding sequences in these two organisms. Make a boxplot of coding sequence length in these organisms. What is the mean and median coding sequence length of these two organisms? Describe any differences between the two organisms.
+len_ecoli <- as.numeric(summary(cds_ecoli)[,1])
+len_corybacterium <- as.numeric(summary(cds_Corybacterium)[,1])
+
+len_ecoli <- as.numeric(summary(cds_ecoli)[,1])
+sum(len_ecoli)
+mean(len_ecoli)
+median(len_ecoli)
+boxplot(len_ecoli,ylab="sequence length for E Coli")
+
+len_corybacterium <- as.numeric(summary(cds_Corybacterium)[,1])
+sum(len_corybacterium)
+mean(len_corybacterium)
+median(len_corybacterium)
+boxplot(len_corybacterium,ylab="sequence length for corybacterium")
+
+```
+as.numeric command is used to create numeric values of the both cds files and sum, mean and median and boxplot commands are used to find the mean, median and boxplot and sum. it seems that the mean and median for the corynebacterium is larger than in e coli. but the sum is larger on e coli. 
+```{r}
+##Calculate the frequency of DNA bases in the total coding sequences for both organisms. Perform the same calculation for the total protein sequence. Create bar plots for nucleotide and amino acid frequency. Describe any differences between the two organisms.
+
+
+dna_composition_ecoli <- count(unlist(cds_ecoli),1)
+dna_composition_corynebacterium <- count(unlist(cds_Corybacterium),1)
+
+barplot(dna_composition_ecoli,xlab="nucleotides",ylab="frequency", main="E coli CDS composition")
+barplot(dna_composition_corynebacterium,xlab="nucleotides",ylab="frequency", main="Corynebacterium CDS composition")
+
+
+
+prot_corynebacterium <- lapply(cds_Corybacterium, translate)
+prot_ecoli <- lapply(cds_ecoli, translate)
+
+aa <- unique(prot_ecoli[[2]])
+aa <- aa[aa != "*"]
+length(aa)
+
+prot_count_ecoli <- count(unlist(prot_ecoli),wordsize=1,alphabet=aa)
+
+prot_count_corynebacterium <- count(unlist(prot_corynebacterium),wordsize=1,alphabet=aa)
+
+barplot(prot_count_ecoli,xlab="amino acids",ylab="frequency", main="E coli amino acid composition")
+barplot(prot_count_corynebacterium,xlab="amino acids",ylab="frequency", main="Corynebacterium amino acid composition")
+
+```
+first dna composition was created for both cds files through count and unlist and a barplot command was used to create te barplot. this was also done to proteins in which prot_count_ecoli and prot_count_corynebacterium was created and inside it was lapply (translated cds) and count was done on unlisted. there is also aa which is used to remove asterisk in unknown amino acids. the barplot was done on the counted proteins. the result showed that there is more A and T on e col than in corynebacterium and less C in ecoli and equl amount of G in both. while for proteins, the corynebacterium contains more a and g and c while ecoli contains more y, q and m. 
+```{r}
+##Create a codon usage table and quantify the codon usage bias among all coding sequences. Describe any differences between the two organisms with respect to their codon usage bias. Provide charts to support your observations.
+codon_corynebacterium <- uco(unlist(cds_Corybacterium),index="rscu",as.data.frame=TRUE)
+
+codon_ecoli <- uco(unlist(cds_ecoli),index="rscu",as.data.frame=TRUE)
+
+
+sorted_ecoli <- codon_ecoli[order(codon_ecoli$RSCU),]
+top10codonsecoli <- head(sorted_ecoli, 10)
+print(top10codonsecoli)
+
+reverse_sorted_ecoli <- codon_ecoli[order(-codon_ecoli$RSCU),]
+top10codonsecolireverse <- head(reverse_sorted_ecoli, 10)
+print(top10codonsecolireverse)
+
+sorted_corynebacterium <- codon_corynebacterium[order(codon_corynebacterium$RSCU),]
+top10codonscorynebacterium <- head(sorted_corynebacterium, 10)
+print(top10codonscorynebacterium)
+
+reverse_sorted_corynebacterium <- codon_corynebacterium[order(-codon_corynebacterium$RSCU),]
+top10codonscorynebacteriumreverse <- head(reverse_sorted_corynebacterium, 10)
+print(top10codonscorynebacteriumreverse)
+
+
+barplot(top10codonsecoli$RSCU, names.arg = top10codonsecoli$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+ 
+barplot(top10codonscorynebacterium$RSCU, names.arg = top10codonscorynebacterium$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+
+barplot(top10codonsecolireverse$RSCU, names.arg = top10codonsecolireverse$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+ 
+barplot(top10codonscorynebacteriumreverse$RSCU, names.arg = top10codonscorynebacteriumreverse$codon , xlab ="codons",
+        ylab ="RSCU",
+        main ="Codon usage bias")
+```
+in this section, first codon usage bias was found rscu using uco command on the unlist cds file. this creates new files in which a rscu was created and with this, the top 10 rscu was found with head(, 10) command. with this it is known which of the rscu was the top 10 highest and lowest, and this was put on a barplot. the result shows that the lowest codon usage bias was aqq in ecoli while tta is for corynebacterium. ctg is the highest codon usage bias in e coli and ctc in corynebacterium. 
+```{r}
+##In the organism of interest, identify 10 protein sequence k-mers of length 3-5 which are the most over- and under-represented k-mers in your organism of interest. Are these k-mers also over- and under-represented in E. coli to a similar extent? Provide plots to support your observations. Why do you think these sequences are present at different levels in the genomes of these organisms?
+
+
+protsecoli <- unlist(prot_ecoli)
+
+mycounts_ecoli <- count(protsecoli,wordsize=3,alphabet=aa)
+
+str(mycounts_ecoli)
+
+head(mycounts_ecoli)
+
+
+prots_corynebacterium <- unlist(prot_corynebacterium)
+
+mycounts_corynebacterium <- count(prots_corynebacterium,wordsize=3,alphabet=aa)
+
+str(mycounts_corynebacterium)
+
+head(mycounts_corynebacterium)
+
+myfreq_corynebacerium <- count(prots_corynebacterium,wordsize=3,alphabet=aa,freq=TRUE)
+myfreqecoli <- count(protsecoli,wordsize=3,alphabet=aa,freq=TRUE)
+head_freq_corynebacterium <- head(myfreq_corynebacerium, 10)
+head_freq_ecoli <- head(myfreqecoli, 10)
+
+barplot(head_freq_ecoli)
+barplot(head_freq_corynebacterium)
+
+```
+with this, the unlisted proteins was counted with a wordsize of 3 and alphabet aa. the result shows that AAA, AAC, AAD, AAE, AAF, AAG, AAL are higher and more prevanlent in e coli rather than in corynebacterium. this could be because of differences in structure in E coli and Corynebacterium such as that E coli is a gram negative and corynebacterium bovis is a gram positive (Vale & Scott, 1977; Mueller & Tainter, 2023). 
+
+references 
+Vale, J. A., & Scott, G. W. (1977). Corynebacterium bovis as a cause of human disease. Lancet (London, England), 2(8040), 682–684. https://doi.org/10.1016/s0140-6736(77)90495-0
+Mueller M, Tainter CR. (2023) Escherichia coli Infection. [Updated 2023 Jul 13]. In: StatPearls [Internet]. Treasure Island (FL): StatPearls Publishing; 
